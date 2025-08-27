@@ -1,327 +1,409 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venkata Chagamu - Data Engineering & Analytics</title>
+    <title>Kanban Task Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?q=80&w=2070&auto=format&fit=crop');
+            background-color: #e0eafc; /* Fallback color */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
-        .bg-grid {
-            background-image: linear-gradient(to right, rgba(229, 231, 235, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(229, 231, 235, 0.4) 1px, transparent 1px);
-            background-size: 40px 40px;
+        .font-poppins {
+            font-family: 'Poppins', sans-serif;
         }
-        /* Timeline styling */
-        .timeline-item {
+        .main-header {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .column-header {
+             text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .kanban-column {
+            min-height: 200px;
+        }
+        .task {
+            cursor: grab;
+            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
             position: relative;
-            padding-left: 2.5rem;
-            padding-bottom: 2rem;
-            border-left: 2px solid #e5e7eb;
         }
-        .timeline-item:last-child {
-            border-left: 2px solid transparent;
+        .task:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        .timeline-dot {
+        .task:active {
+            cursor: grabbing;
+        }
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(3deg);
+        }
+        .drag-over {
+            background-color: rgba(0, 0, 0, 0.05);
+            border: 2px dashed #818cf8;
+        }
+        .delete-btn {
             position: absolute;
-            left: -0.5625rem;
-            top: 0.25rem;
-            width: 1.125rem;
-            height: 1.125rem;
+            top: 8px;
+            right: 8px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
             border-radius: 9999px;
-            background-color: #3b82f6;
-            border: 2px solid #ffffff;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0,0,0,0.05);
         }
-        .skill-logo {
-            filter: grayscale(100%);
-            opacity: 0.6;
-            transition: all 0.3s ease;
-        }
-        li:hover .skill-logo {
-            filter: grayscale(0%);
+        .task:hover .delete-btn {
             opacity: 1;
+        }
+        .delete-btn:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+        .due-date {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        .due-date.overdue {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        .task-text {
+             cursor: text;
+        }
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .task-enter {
+            animation: task-enter-animation 0.3s ease-out;
+        }
+        @keyframes task-enter-animation {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .task-counter {
+            background-color: #e0e7ff;
+            color: #4f46e5;
+            border-radius: 9999px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
     </style>
 </head>
-<body class="bg-white text-gray-800" x-data="{ openMenu: false }">
+<body class="text-gray-800">
 
-    <!-- Header -->
-    <header class="bg-white/80 backdrop-blur-lg fixed top-0 left-0 right-0 z-50 border-b border-gray-200">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <a href="#home" class="flex items-center space-x-3">
-                    <span class="bg-blue-600 text-white text-xl font-bold w-10 h-10 flex items-center justify-center rounded-md">VC</span>
-                    <span class="text-2xl font-bold text-gray-900">Venkata Chagamu</span>
-                </a>
-                <nav class="hidden md:flex space-x-6 items-center">
-                    <a href="#about" class="text-gray-600 hover:text-blue-600 transition-colors">My Story</a>
-                    <a href="#skills" class="text-gray-600 hover:text-blue-600 transition-colors">Skills</a>
-                    <a href="#experience" class="text-gray-600 hover:text-blue-600 transition-colors">Experience</a>
-                    <a href="#projects" class="text-gray-600 hover:text-blue-600 transition-colors">Projects</a>
-                    <a href="#contact" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">Contact</a>
-                </nav>
-                <button @click="openMenu = !openMenu" class="md:hidden">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
-            </div>
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 font-poppins main-header">TaskFlow</h1>
+            <p class="text-gray-600 mt-2">Organize your work, one task at a time.</p>
+        </header>
+
+        <!-- Form to add new tasks -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-4 mb-8 max-w-2xl mx-auto">
+            <form id="add-task-form" class="flex flex-col sm:flex-row gap-3 items-center">
+                <input type="text" id="new-task-input" placeholder="Enter a new task..." class="flex-grow p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition w-full" required>
+                <input type="date" id="new-task-due-date" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <button type="submit" class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-indigo-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-full sm:w-auto shadow-md hover:shadow-lg">Add Task</button>
+            </form>
         </div>
-    </header>
 
-    <!-- Mobile Menu -->
-    <div x-show="openMenu" @click.away="openMenu = false" class="fixed inset-0 bg-black/50 z-40 md:hidden" x-cloak>
-        <div class="absolute top-0 right-0 h-full w-64 bg-white p-8">
-            <nav class="flex flex-col space-y-6">
-                <a href="#about" @click="openMenu = false" class="text-gray-600 hover:text-blue-600 transition-colors">My Story</a>
-                <a href="#skills" @click="openMenu = false" class="text-gray-600 hover:text-blue-600 transition-colors">Skills</a>
-                <a href="#experience" @click="openMenu = false" class="text-gray-600 hover:text-blue-600 transition-colors">Experience</a>
-                <a href="#projects" @click="openMenu = false" class="text-gray-600 hover:text-blue-600 transition-colors">Projects</a>
-                <a href="#contact" @click="openMenu = false" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">Contact</a>
-            </nav>
+        <!-- Kanban Board -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- To Do Column -->
+            <div id="todo" class="bg-white/70 backdrop-blur-sm rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold text-gray-700 p-4 border-b border-gray-200 flex items-center justify-between column-header">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        <span>To Do</span>
+                    </div>
+                    <span class="task-counter" data-count-for="todo">0</span>
+                </h2>
+                <div class="kanban-column p-4 space-y-4" data-column="todo"></div>
+            </div>
+
+            <!-- In Progress Column -->
+            <div id="inprogress" class="bg-white/70 backdrop-blur-sm rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold text-gray-700 p-4 border-b border-gray-200 flex items-center justify-between column-header">
+                     <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>In Progress</span>
+                    </div>
+                    <span class="task-counter" data-count-for="inprogress">0</span>
+                </h2>
+                <div class="kanban-column p-4 space-y-4" data-column="inprogress"></div>
+            </div>
+
+            <!-- Done Column -->
+            <div id="done" class="bg-white/70 backdrop-blur-sm rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold text-gray-700 p-4 border-b border-gray-200 flex items-center justify-between column-header">
+                     <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>Done</span>
+                    </div>
+                    <span class="task-counter" data-count-for="done">0</span>
+                </h2>
+                <div class="kanban-column p-4 space-y-4" data-column="done"></div>
+            </div>
         </div>
     </div>
 
-    <main>
-        <!-- Hero Section -->
-        <section id="home" class="pt-24 bg-grid">
-            <!-- This section is now primarily a spacer for the fixed header -->
-        </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('add-task-form');
+            const taskInput = document.getElementById('new-task-input');
+            const dueDateInput = document.getElementById('new-task-due-date');
+            const columns = document.querySelectorAll('.kanban-column');
 
-        <!-- About Section -->
-        <section id="about" class="py-20 bg-gray-50">
-            <div class="container mx-auto px-6">
-                <div class="grid md:grid-cols-3 gap-10 items-center">
-                    <div class="md:col-span-1">
-                        <img src="https://i.postimg.cc/c4bq9V0P/Gemini-Generated-Image-jktq5zjktq5zjktq.png" 
-                             onerror="this.onerror=null;this.src='https://placehold.co/400x400/3B82F6/FFFFFF?text=VC';"
-                             alt="Venkata Chagamu" 
-                             class="rounded-full mx-auto w-64 h-64 object-cover shadow-lg">
-                    </div>
-                    <div class="md:col-span-2">
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">My Story</h2>
-                        <p class="text-gray-600 mb-4 text-lg">My journey into data began with a fascination for uncovering patterns. I started in analytics, driven by the desire to answer complex business questions. However, I quickly realized that the quality of any insight is fundamentally limited by the quality of the underlying data infrastructure.</p>
-                        <p class="text-gray-600 text-lg">This realization pushed me into data engineering, where I learned to build the systems that ensure data is reliable, timely, and accessible. Today, I operate at the intersection of these two worlds. I don't just analyze data; I build the foundations it rests upon. This dual perspective allows me to create truly end-to-end data solutions that are both technically sound and strategically valuable.</p>
-                    </div>
-                </div>
-                <div class="mt-16 flex justify-center space-x-4">
-                    <a href="#projects" class="bg-blue-600 text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-blue-700 transition-transform hover:scale-105">View My Work</a>
-                    <a href="#contact" class="bg-gray-200 text-gray-800 px-6 py-3 rounded-md text-lg font-semibold hover:bg-gray-300 transition-transform hover:scale-105">Get In Touch</a>
-                </div>
-            </div>
-        </section>
+            // --- Task Management ---
+            loadTasks();
 
-        <!-- Skills & Technologies Section -->
-        <section id="skills" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Skills & Technologies</h2>
-                    <p class="mt-4 text-lg text-gray-600">The tools and technologies I use to bring data to life.</p>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="bg-gray-50 p-8 rounded-lg shadow-lg">
-                        <h3 class="text-2xl font-bold mb-4">Languages & Databases</h3>
-                        <ul class="space-y-4 text-gray-700 text-lg">
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/python.svg" class="w-6 h-6 mr-3 skill-logo" alt="Python logo"> Python</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg" class="w-6 h-6 mr-3 skill-logo" alt="SQL logo"> SQL</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/snowflake.svg" class="w-6 h-6 mr-3 skill-logo" alt="Snowflake logo"> Snowflake</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/googlebigquery.svg" class="w-6 h-6 mr-3 skill-logo" alt="BigQuery logo"> Google BigQuery</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg" class="w-6 h-6 mr-3 skill-logo" alt="PostgreSQL logo"> PostgreSQL</li>
-                        </ul>
-                    </div>
-                    <div class="bg-gray-50 p-8 rounded-lg shadow-lg">
-                        <h3 class="text-2xl font-bold mb-4">Data Engineering</h3>
-                        <ul class="space-y-4 text-gray-700 text-lg">
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apacheairflow.svg" class="w-6 h-6 mr-3 skill-logo" alt="Airflow logo"> Apache Airflow</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/dbt.svg" class="w-6 h-6 mr-3 skill-logo" alt="dbt logo"> dbt (Data Build Tool)</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apachespark.svg" class="w-6 h-6 mr-3 skill-logo" alt="Spark logo"> Apache Spark</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apachekafka.svg" class="w-6 h-6 mr-3 skill-logo" alt="Kafka logo"> Kafka</li>
-                             <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/docker.svg" class="w-6 h-6 mr-3 skill-logo" alt="Docker logo"> Docker</li>
-                        </ul>
-                    </div>
-                    <div class="bg-gray-50 p-8 rounded-lg shadow-lg">
-                        <h3 class="text-2xl font-bold mb-4">Analytics & BI</h3>
-                        <ul class="space-y-4 text-gray-700 text-lg">
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/tableau.svg" class="w-6 h-6 mr-3 skill-logo" alt="Tableau logo"> Tableau</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/powerbi.svg" class="w-6 h-6 mr-3 skill-logo" alt="Power BI logo"> Microsoft Power BI</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/pandas.svg" class="w-6 h-6 mr-3 skill-logo" alt="Pandas logo"> Pandas & NumPy</li>
-                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/scikitlearn.svg" class="w-6 h-6 mr-3 skill-logo" alt="Scikit-learn logo"> Scikit-learn</li>
-                            <li class="flex items-center">
-                                <svg class="w-6 h-6 mr-3 skill-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9.5M9 5.5v.01M15 19v-6a2 2 0 00-2-2h-2a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9.5M15 5.5v.01"></path></svg>
-                                A/B Testing
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Experience Section -->
-        <section id="experience" class="py-20 bg-gray-50">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Professional Experience</h2>
-                    <p class="mt-4 text-lg text-gray-600">My journey in the data industry.</p>
-                </div>
-                <div class="max-w-3xl mx-auto">
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <h3 class="text-xl font-bold text-gray-900">Senior Data Engineer</h3>
-                        <p class="font-semibold text-blue-600">Tech Solutions Inc. | 2022 - Present</p>
-                        <p class="mt-2 text-gray-600">Leading the development of a new cloud-based data platform. Responsible for designing and implementing scalable ETL pipelines that process terabytes of data daily, significantly improving data availability and reliability for the analytics team.</p>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <h3 class="text-xl font-bold text-gray-900">Data Engineer</h3>
-                        <p class="font-semibold text-blue-600">Innovate Analytics Co. | 2020 - 2022</p>
-                        <p class="mt-2 text-gray-600">Developed and maintained data pipelines using Airflow and dbt. Collaborated with data scientists to productionize machine learning models. Played a key role in migrating legacy data systems to Snowflake.</p>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <h3 class="text-xl font-bold text-gray-900">Junior Data Analyst</h3>
-                        <p class="font-semibold text-blue-600">Data Insights Group | 2019 - 2020</p>
-                        <p class="mt-2 text-gray-600">Created dashboards and reports in Tableau to track key business metrics. Performed exploratory data analysis to identify trends and opportunities, providing actionable insights to the marketing and product teams.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+                const taskText = taskInput.value.trim();
+                const dueDate = dueDateInput.value;
+                if (taskText) {
+                    const task = createTaskElement(taskText, dueDate);
+                    document.querySelector('[data-column="todo"]').appendChild(task);
+                    
+                    // Trigger enter animation
+                    task.classList.add('task-enter');
+                    setTimeout(() => task.classList.remove('task-enter'), 300);
 
-        <!-- Projects Section -->
-        <section id="projects" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Featured Projects</h2>
-                    <p class="mt-4 text-lg text-gray-600">A selection of projects that demonstrate my capabilities.</p>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Project Cards -->
-                    <div class="bg-gray-50 rounded-lg shadow-lg overflow-hidden group">
-                        <img src="https://placehold.co/600x400/E2E8F0/4A5568?text=Project+1" alt="Project 1" class="w-full h-48 object-cover group-hover:opacity-80 transition-opacity">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">Real-time Analytics Dashboard</h3>
-                            <p class="text-gray-600 mb-4">Developed an end-to-end pipeline streaming sales data into a live Tableau dashboard, reducing reporting latency by 95%.</p>
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Kafka</span>
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Spark</span>
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Snowflake</span>
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Tableau</span>
-                            </div>
-                            <a href="#" class="text-blue-600 font-semibold hover:underline">View Case Study &rarr;</a>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 rounded-lg shadow-lg overflow-hidden group">
-                        <img src="https://placehold.co/600x400/E2E8F0/4A5568?text=Project+2" alt="Project 2" class="w-full h-48 object-cover group-hover:opacity-80 transition-opacity">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">Customer Churn Prediction Model</h3>
-                            <p class="text-gray-600 mb-4">Analyzed user behavior to build a model predicting churn with 88% accuracy, enabling proactive retention campaigns.</p>
-                             <div class="flex flex-wrap gap-2 mb-4">
-                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Python</span>
-                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Scikit-learn</span>
-                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">SQL</span>
-                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Power BI</span>
-                            </div>
-                            <a href="#" class="text-blue-600 font-semibold hover:underline">View Case Study &rarr;</a>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 rounded-lg shadow-lg overflow-hidden group">
-                        <img src="https://placehold.co/600x400/E2E8F0/4A5568?text=Project+3" alt="Project 3" class="w-full h-48 object-cover group-hover:opacity-80 transition-opacity">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">Cloud Data Warehouse Migration</h3>
-                            <p class="text-gray-600 mb-4">Led the migration of on-premise data to a BigQuery data warehouse, improving query performance by 10x and reducing costs.</p>
-                             <div class="flex flex-wrap gap-2 mb-4">
-                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">GCP</span>
-                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">BigQuery</span>
-                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Airflow</span>
-                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">dbt</span>
-                            </div>
-                            <a href="#" class="text-blue-600 font-semibold hover:underline">View Case Study &rarr;</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+                    taskInput.value = '';
+                    dueDateInput.value = '';
+                    saveAndRefresh();
+                }
+            });
 
-        <!-- Certifications Section -->
-        <section id="certifications" class="py-20 bg-gray-50">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Certifications</h2>
-                    <p class="mt-4 text-lg text-gray-600">My commitment to continuous learning and professional development.</p>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                    <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
-                        <img src="https://placehold.co/64x64/3B82F6/FFFFFF?text=Cert" class="w-16 h-16 mr-4" alt="Cert Logo">
-                        <div>
-                            <h3 class="font-bold text-lg">Google Professional Data Engineer</h3>
-                            <p class="text-gray-500">Google Cloud</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
-                        <img src="https://placehold.co/64x64/3B82F6/FFFFFF?text=Cert" class="w-16 h-16 mr-4" alt="Cert Logo">
-                        <div>
-                            <h3 class="font-bold text-lg">AWS Certified Data Analytics – Specialty</h3>
-                            <p class="text-gray-500">Amazon Web Services</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
-                        <img src="https://placehold.co/64x64/3B82F6/FFFFFF?text=Cert" class="w-16 h-16 mr-4" alt="Cert Logo">
-                        <div>
-                            <h3 class="font-bold text-lg">dbt Analytics Engineering Certification</h3>
-                            <p class="text-gray-500">dbt Labs</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Testimonials Section -->
-        <section id="testimonials" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">What Others Say</h2>
-                </div>
-                <div class="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
-                    <div class="bg-gray-50 p-8 rounded-lg shadow-lg">
-                        <p class="text-gray-600 italic">"Venkata's ability to architect robust data pipelines was a game-changer for our analytics capabilities. He is a strategic thinker and a phenomenal engineer."</p>
-                        <p class="mt-4 font-bold text-gray-900">- Jane Smith</p>
-                        <p class="text-sm text-gray-500">Head of Analytics, Tech Solutions Inc.</p>
-                    </div>
-                    <div class="bg-gray-50 p-8 rounded-lg shadow-lg">
-                        <p class="text-gray-600 italic">"He has a unique talent for translating complex technical concepts into clear business value. His work on our churn model directly impacted our retention strategy."</p>
-                        <p class="mt-4 font-bold text-gray-900">- Michael Brown</p>
-                        <p class="text-sm text-gray-500">Product Manager, Innovate Analytics Co.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            function createTaskElement(text, dueDate, id = `task-${Date.now()}`) {
+                const task = document.createElement('div');
+                task.className = 'task bg-white p-4 rounded-md shadow-sm border border-gray-200';
+                task.draggable = true;
+                task.id = id;
 
-        <!-- Contact Section -->
-        <section id="contact" class="py-20 bg-gray-50">
-            <div class="container mx-auto px-6">
-                <div class="text-center max-w-2xl mx-auto">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Let's Build Something Great Together</h2>
-                    <p class="mt-4 text-lg text-gray-600">I'm currently available for freelance projects and full-time opportunities. If you have a data challenge, I'd love to hear about it.</p>
-                    <a href="mailto:your-email@example.com" class="mt-8 inline-block bg-blue-600 text-white px-8 py-4 rounded-md text-lg font-semibold hover:bg-blue-700 transition-transform hover:scale-105">your-email@example.com</a>
-                    <div class="mt-10 flex justify-center space-x-6">
-                        <a href="#" class="text-gray-500 hover:text-blue-600">
-                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"/></svg>
-                        </a>
-                        <a href="#" class="text-gray-500 hover:text-blue-600">
-                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+                const taskText = document.createElement('p');
+                taskText.className = 'task-text';
+                taskText.textContent = text;
+                task.appendChild(taskText);
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-6">
-        <div class="container mx-auto px-6 text-center">
-            <p>&copy; 2025 Venkata Chagamu. All Rights Reserved.</p>
-        </div>
-    </footer>
+                taskText.addEventListener('click', () => enableEditing(taskText));
 
+                if (dueDate) {
+                    const dueDateEl = document.createElement('p');
+                    dueDateEl.className = 'due-date mt-2';
+                    dueDateEl.textContent = `Due: ${dueDate}`;
+                    task.appendChild(dueDateEl);
+                    checkOverdue(dueDate, dueDateEl);
+                }
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '&#x2715;';
+                deleteBtn.addEventListener('click', () => {
+                    task.remove();
+                    saveAndRefresh();
+                });
+                task.appendChild(deleteBtn);
+
+                task.addEventListener('dragstart', handleDragStart);
+                task.addEventListener('dragend', handleDragEnd);
+
+                return task;
+            }
+            
+            function enableEditing(taskTextElement) {
+                const currentText = taskTextElement.textContent;
+                const taskElement = taskTextElement.parentElement;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentText;
+                input.className = 'w-full p-1 border rounded';
+
+                const saveEdit = () => {
+                    const newText = input.value.trim();
+                    if (newText) taskTextElement.textContent = newText;
+                    taskElement.replaceChild(taskTextElement, input);
+                    saveAndRefresh();
+                };
+
+                input.addEventListener('blur', saveEdit);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') saveEdit();
+                    else if (e.key === 'Escape') taskElement.replaceChild(taskTextElement, input);
+                });
+
+                taskElement.replaceChild(input, taskTextElement);
+                input.focus();
+            }
+
+            function checkOverdue(dueDate, element) {
+                if (!dueDate) return;
+                const today = new Date();
+                const due = new Date(dueDate);
+                today.setHours(0, 0, 0, 0);
+                due.setHours(0,0,0,0);
+                if (due < today) element.classList.add('overdue');
+                else element.classList.remove('overdue');
+            }
+
+            function updateTaskCounters() {
+                columns.forEach(column => {
+                    const columnId = column.dataset.column;
+                    const taskCount = column.getElementsByClassName('task').length;
+                    const counter = document.querySelector(`[data-count-for="${columnId}"]`);
+                    if (counter) counter.textContent = taskCount;
+                });
+            }
+
+            // --- Drag and Drop Logic ---
+            let draggedTask = null;
+
+            function handleDragStart(e) {
+                draggedTask = e.target;
+                setTimeout(() => e.target.classList.add('dragging'), 0);
+            }
+
+            function handleDragEnd(e) {
+                e.target.classList.remove('dragging');
+                draggedTask = null;
+            }
+
+            columns.forEach(column => {
+                column.addEventListener('dragover', e => e.preventDefault());
+                column.addEventListener('dragenter', e => {
+                    if (e.target.classList.contains('kanban-column')) e.target.classList.add('drag-over');
+                });
+                column.addEventListener('dragleave', e => {
+                    if (e.target.classList.contains('kanban-column')) e.target.classList.remove('drag-over');
+                });
+                column.addEventListener('drop', e => {
+                    e.preventDefault();
+                    const column = e.target.closest('.kanban-column');
+                    if (column && draggedTask) {
+                        column.classList.remove('drag-over');
+                        const wasDone = draggedTask.parentElement.dataset.column === 'done';
+                        const isNowDone = column.dataset.column === 'done';
+                        column.appendChild(draggedTask);
+                        saveAndRefresh();
+                        if (!wasDone && isNowDone) triggerConfetti();
+                    }
+                });
+            });
+
+            // --- Persistence and State Management ---
+            function saveAndRefresh() {
+                saveTasks();
+                updateTaskCounters();
+            }
+
+            function saveTasks() {
+                const tasksByColumn = {};
+                columns.forEach(column => {
+                    const columnId = column.dataset.column;
+                    tasksByColumn[columnId] = Array.from(column.querySelectorAll('.task')).map(task => {
+                        const text = task.querySelector('.task-text').textContent;
+                        const dueDateEl = task.querySelector('.due-date');
+                        const dueDate = dueDateEl ? dueDateEl.textContent.replace('Due: ', '') : null;
+                        return { id: task.id, text, dueDate };
+                    });
+                });
+                localStorage.setItem('kanbanTasks', JSON.stringify(tasksByColumn));
+            }
+
+            function loadTasks() {
+                const savedTasks = JSON.parse(localStorage.getItem('kanbanTasks'));
+                if (savedTasks) {
+                    Object.keys(savedTasks).forEach(columnId => {
+                        const column = document.querySelector(`[data-column="${columnId}"]`);
+                        if (column) {
+                            savedTasks[columnId].forEach(taskData => {
+                                const task = createTaskElement(taskData.text, taskData.dueDate, taskData.id);
+                                column.appendChild(task);
+                            });
+                        }
+                    });
+                }
+                updateTaskCounters();
+            }
+
+            // --- Confetti Animation ---
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            let confettiParticles = [];
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            const colors = ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722"];
+
+            function triggerConfetti() {
+                confettiParticles = [];
+                for (let i = 0; i < 200; i++) {
+                    confettiParticles.push({
+                        x: canvas.width / 2,
+                        y: canvas.height / 2,
+                        radius: Math.random() * 4 + 2,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        vx: Math.random() * 10 - 5,
+                        vy: Math.random() * -15 - 5,
+                        alpha: 1,
+                        gravity: 0.4
+                    });
+                }
+                animateConfetti();
+            }
+
+            let animationFrameId;
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confettiParticles.forEach((p, i) => {
+                    p.vy += p.gravity;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.alpha -= 0.01;
+                    if (p.alpha <= 0) confettiParticles.splice(i, 1);
+                    else {
+                        ctx.globalAlpha = p.alpha;
+                        ctx.beginPath();
+                        ctx.fillStyle = p.color;
+                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+                if (confettiParticles.length > 0) animationFrameId = requestAnimationFrame(animateConfetti);
+                else cancelAnimationFrame(animationFrameId);
+            }
+        });
+    </script>
 </body>
 </html>
