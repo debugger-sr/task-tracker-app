@@ -35,6 +35,15 @@
             background-color: #3b82f6;
             border: 2px solid #ffffff;
         }
+        .skill-logo {
+            filter: grayscale(100%);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+        li:hover .skill-logo {
+            filter: grayscale(0%);
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-white text-gray-800" x-data="{ openMenu: false }">
@@ -49,7 +58,7 @@
                 </a>
                 <nav class="hidden md:flex space-x-6 items-center">
                     <a href="#about" class="text-gray-600 hover:text-blue-600 transition-colors">My Story</a>
-                    <a href="#services" class="text-gray-600 hover:text-blue-600 transition-colors">What I Do</a>
+                    <a href="#skills" class="text-gray-600 hover:text-blue-600 transition-colors">Skills</a>
                     <a href="#experience" class="text-gray-600 hover:text-blue-600 transition-colors">Experience</a>
                     <a href="#projects" class="text-gray-600 hover:text-blue-600 transition-colors">Projects</a>
                     <a href="#contact" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">Contact</a>
@@ -66,7 +75,7 @@
         <div class="absolute top-0 right-0 h-full w-64 bg-white p-8">
             <nav class="flex flex-col space-y-6">
                 <a href="#about" @click="openMenu = false" class="text-gray-600 hover:text-blue-600 transition-colors">My Story</a>
-                <a href="#services" @click="openMenu = false" class="text-gray-600 hover:text-blue-600 transition-colors">What I Do</a>
+                <a href="#skills" @click="openMenu = false" class="text-gray-600 hover:text-blue-600 transition-colors">Skills</a>
                 <a href="#experience" @click="openMenu = false" class="text-gray-600 hover:text-blue-600 transition-colors">Experience</a>
                 <a href="#projects" @click="openMenu = false" class="text-gray-600 hover:text-blue-600 transition-colors">Projects</a>
                 <a href="#contact" @click="openMenu = false" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">Contact</a>
@@ -85,7 +94,7 @@
             <div class="container mx-auto px-6">
                 <div class="grid md:grid-cols-3 gap-10 items-center">
                     <div class="md:col-span-1">
-                        <img src="https://i.postimg.cc/zBnchWyB/imgvenkata.jpg" 
+                        <img src="https://i.postimg.cc/c4bq9V0P/Gemini-Generated-Image-jktq5zjktq5zjktq.png" 
                              onerror="this.onerror=null;this.src='https://placehold.co/400x400/3B82F6/FFFFFF?text=VC';"
                              alt="Venkata Chagamu" 
                              class="rounded-full mx-auto w-64 h-64 object-cover shadow-lg">
@@ -103,32 +112,45 @@
             </div>
         </section>
 
-        <!-- Services Section -->
-        <section id="services" class="py-20 bg-white">
+        <!-- Skills & Technologies Section -->
+        <section id="skills" class="py-20 bg-white">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">What I Do</h2>
-                    <p class="mt-4 text-lg text-gray-600">My expertise spans the entire data lifecycle.</p>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Skills & Technologies</h2>
+                    <p class="mt-4 text-lg text-gray-600">The tools and technologies I use to bring data to life.</p>
                 </div>
-                <div class="grid md:grid-cols-2 gap-10">
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <div class="bg-gray-50 p-8 rounded-lg shadow-lg">
-                        <h3 class="text-2xl font-bold mb-4">Data Engineering</h3>
-                        <p class="text-gray-600 mb-6">I design, build, and maintain scalable and reliable data pipelines and architectures.</p>
-                        <ul class="space-y-3 text-gray-700">
-                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">&#10003;</span> Cloud Data Warehousing (Snowflake, BigQuery)</li>
-                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">&#10003;</span> ETL/ELT Pipeline Development (Airflow, dbt)</li>
-                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">&#10003;</span> Data Modeling & Architecture</li>
-                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">&#10003;</span> Streaming Data Processing (Kafka, Spark)</li>
+                        <h3 class="text-2xl font-bold mb-4">Languages & Databases</h3>
+                        <ul class="space-y-4 text-gray-700 text-lg">
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/python.svg" class="w-6 h-6 mr-3 skill-logo" alt="Python logo"> Python</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg" class="w-6 h-6 mr-3 skill-logo" alt="SQL logo"> SQL</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/snowflake.svg" class="w-6 h-6 mr-3 skill-logo" alt="Snowflake logo"> Snowflake</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/googlebigquery.svg" class="w-6 h-6 mr-3 skill-logo" alt="BigQuery logo"> Google BigQuery</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg" class="w-6 h-6 mr-3 skill-logo" alt="PostgreSQL logo"> PostgreSQL</li>
                         </ul>
                     </div>
                     <div class="bg-gray-50 p-8 rounded-lg shadow-lg">
-                        <h3 class="text-2xl font-bold mb-4">Data Analytics</h3>
-                        <p class="text-gray-600 mb-6">I translate complex datasets into clear, actionable insights that drive business decisions.</p>
-                        <ul class="space-y-3 text-gray-700">
-                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">&#10003;</span> Business Intelligence & Dashboarding (Tableau, Power BI)</li>
-                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">&#10003;</span> Statistical Analysis & A/B Testing</li>
-                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">&#10003;</span> Product Analytics & Funnel Analysis</li>
-                            <li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">&#10003;</span> Exploratory Data Analysis & Insight Generation</li>
+                        <h3 class="text-2xl font-bold mb-4">Data Engineering</h3>
+                        <ul class="space-y-4 text-gray-700 text-lg">
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apacheairflow.svg" class="w-6 h-6 mr-3 skill-logo" alt="Airflow logo"> Apache Airflow</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/dbt.svg" class="w-6 h-6 mr-3 skill-logo" alt="dbt logo"> dbt (Data Build Tool)</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apachespark.svg" class="w-6 h-6 mr-3 skill-logo" alt="Spark logo"> Apache Spark</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apachekafka.svg" class="w-6 h-6 mr-3 skill-logo" alt="Kafka logo"> Kafka</li>
+                             <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/docker.svg" class="w-6 h-6 mr-3 skill-logo" alt="Docker logo"> Docker</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4">Analytics & BI</h3>
+                        <ul class="space-y-4 text-gray-700 text-lg">
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/tableau.svg" class="w-6 h-6 mr-3 skill-logo" alt="Tableau logo"> Tableau</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/powerbi.svg" class="w-6 h-6 mr-3 skill-logo" alt="Power BI logo"> Microsoft Power BI</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/pandas.svg" class="w-6 h-6 mr-3 skill-logo" alt="Pandas logo"> Pandas & NumPy</li>
+                            <li class="flex items-center"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/scikitlearn.svg" class="w-6 h-6 mr-3 skill-logo" alt="Scikit-learn logo"> Scikit-learn</li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 mr-3 skill-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9.5M9 5.5v.01M15 19v-6a2 2 0 00-2-2h-2a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9.5M15 5.5v.01"></path></svg>
+                                A/B Testing
+                            </li>
                         </ul>
                     </div>
                 </div>
